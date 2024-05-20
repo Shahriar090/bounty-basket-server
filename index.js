@@ -23,10 +23,16 @@ const client = new MongoClient(uri, {
   },
 });
 
+// collections
+const flashSaleCollection = client.db("bountyBasket").collection("flashSale");
+const allProductsCollection = client
+  .db("bountyBasket")
+  .collection("all-products");
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -40,6 +46,56 @@ async function run() {
 run().catch(console.dir);
 
 // main api starts from here
+
+// all products
+// app.get("/all-products", async (req, res) => {
+//   const cursor = allProductsCollection.find();
+//   const result = await cursor.toArray();
+//   res.send(result);
+// });
+
+// flash sale api
+app.get("/flash-sale", async (req, res) => {
+  const cursor = flashSaleCollection.find();
+  const result = await cursor.toArray();
+  res.send(result);
+});
+
+// some data based on category
+
+// app.get("/all-products", async (req, res) => {
+//   const { category } = req.query;
+//   const query = category ? { category } : {};
+
+//   try {
+//     const products = await allProductsCollection.find(query).toArray();
+//     res.json(products);
+//   } catch (error) {
+//     console.error("Error fetching products:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
+
+// trending products
+
+app.get("/all-products", async (req, res) => {
+  const { category, sort, limit } = req.query;
+  const query = category ? { category } : {};
+  const sortOption = sort === "rating" ? { rating: -1 } : {};
+  const limitOption = parseInt(limit, 10) || 0;
+
+  try {
+    const products = await allProductsCollection
+      .find(query)
+      .sort(sortOption)
+      .limit(limitOption)
+      .toArray();
+    res.json(products);
+  } catch (error) {
+    console.error("Error Fetching Products", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 // main api ends here
 
