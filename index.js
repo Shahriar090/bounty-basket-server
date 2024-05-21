@@ -11,7 +11,7 @@ app.use(express.json());
 
 // mongodb uri
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.caldhyv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -95,6 +95,15 @@ app.get("/all-products", async (req, res) => {
     console.error("Error Fetching Products", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+// get single product
+
+app.get("/all-products/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await allProductsCollection.findOne(query);
+  res.send(result);
 });
 
 // main api ends here
